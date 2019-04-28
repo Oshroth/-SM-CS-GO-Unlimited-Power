@@ -12,6 +12,7 @@
 #include <sdktools>
 #include <cstrike>
 #include <sdkhooks>
+#include "include/csgoitems"
 
 #pragma newdecls required
 
