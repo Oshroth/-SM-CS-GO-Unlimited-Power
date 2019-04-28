@@ -3,9 +3,10 @@
 #define DEBUG
 
 #define PLUGIN_AUTHOR "Oshroth"
-#define PLUGIN_VERSION "1.2.0b2"
+#define PLUGIN_VERSION "1.2.0b3"
 
 #define MAX_WEAPON_STRING 80
+#define	MAX_WEAPON_SLOTS 6
 
 #include <sourcemod>
 #include <sdktools>
@@ -92,7 +93,19 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		return Plugin_Continue;
 	}
 	int teamIndex = GetClientTeam(client);
-	if (IsPlayerAlive(client) && (teamIndex == CS_TEAM_CT || teamIndex == CS_TEAM_T)) { 
+	if (IsPlayerAlive(client) && (teamIndex == CS_TEAM_CT || teamIndex == CS_TEAM_T)) {
+		int weapon_index = -1;
+	
+		for (int slot = 0; slot < MAX_WEAPON_SLOTS; slot++)
+		{
+			weapon_index = GetPlayerWeaponSlot(client, slot);
+			if (weapon_index != -1 && IsValidEntity(weapon_index)) {
+				char sWeapon[MAX_WEAPON_STRING];
+				GetEntityClassname(weapon_index, sWeapon, sizeof(sWeapon));
+				
+				PrintToChat(client, "Weapon in slot: %d = %s", slot, sWeapon);
+			}
+		}
 		GivePlayerItem(client, "weapon_taser"); 
 	} 
 	
