@@ -23,9 +23,9 @@ public Plugin myinfo =
 	url = ""
 };
 
-ConVar sm_zeus_active, sm_zeus_infinite_ammo;
-bool IsZeusActive = true;
-bool IsInfiniteAmmoActive = false;
+ConVar cvarZeusActive, cvarZeusInfiniteAmmo;
+bool isZeusActive = true;
+bool isInfiniteAmmoActive = false;
 
 public void OnPluginStart()
 {
@@ -35,21 +35,24 @@ public void OnPluginStart()
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
-	sm_zeus_active = CreateConVar("sm_zeus_active", "1", "Give Zeus tazers to everyone");
-	sm_zeus_infinite_ammo = CreateConVar("sm_zeus_infinite_ammo", "0", "Zeus never runs out of ammo (NYI)");
+	cvarZeusActive = CreateConVar("sm_unlimited_power_active", "1", "Everyone starts with Zeus Taser");
+	cvarZeusInfiniteAmmo = CreateConVar("sm_unlimited_power_infinite_ammo", "0", "Zeus never runs out of ammo");
 	
-	sm_zeus_active.AddChangeHook(OnChangedZeusActive);
-	sm_zeus_infinite_ammo.AddChangeHook(OnChangedInfiniteAmmo);
+	isZeusActive = cvarZeusActive.BoolValue;
+	isInfiniteAmmoActive = cvarZeusInfiniteAmmo.BoolValue;
 	
-	AutoExecConfig(true, "plugin_givezeus");
+	cvarZeusActive.AddChangeHook(OnChangedZeusActive);
+	cvarZeusInfiniteAmmo.AddChangeHook(OnChangedInfiniteAmmo);
+	
+	AutoExecConfig(true, "plugin_unlimited_power");
 	
 	HookEvent("player_spawn", OnPlayerSpawn);
 }
 
 public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast) 
 { 
-	//LogAction(0, 0, "OnPlayerSpawn IsActive:%b", IsZeusActive);
-	if(!IsZeusActive) {
+	//LogAction(0, 0, "OnPlayerSpawn IsActive:%b", isZeusActive);
+	if(!isZeusActive) {
 		return Plugin_Continue;
 	}
 	// Get client from userid in event parameters 
@@ -73,20 +76,14 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	} 
 	
 	return Plugin_Continue; 
-}  
-
-public void OnConfigsExecuted() {
-	//LogAction(0, 0, "OnConfigExecuted ZeusActive %b", sm_zeus_active.BoolValue);
-	IsZeusActive = sm_zeus_active.BoolValue;
-	IsInfiniteAmmoActive = sm_zeus_infinite_ammo.BoolValue;
 }
 
 public void OnChangedZeusActive(ConVar convar, const char[] oldValue, const char[] newValue) {
-	IsZeusActive = sm_zeus_active.BoolValue;
-	//LogAction(0, 0, "OnChangedZeusActive %b", sm_zeus_active.BoolValue);
+	isZeusActive = cvarZeusActive.BoolValue;
+	//LogAction(0, 0, "OnChangedZeusActive %b", cvarZeusActive.BoolValue);
 }
 
 public void OnChangedInfiniteAmmo(ConVar convar, const char[] oldValue, const char[] newValue) {
-	IsInfiniteAmmoActive = sm_zeus_infinite_ammo.BoolValue;
-	if (IsInfiniteAmmoActive) {}
+	isInfiniteAmmoActive = cvarZeusInfiniteAmmo.BoolValue;
+	if (isInfiniteAmmoActive) {}
 }
