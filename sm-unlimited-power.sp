@@ -3,7 +3,7 @@
 #define DEBUG
 
 #define PLUGIN_AUTHOR "Oshroth"
-#define PLUGIN_VERSION "1.2.0b5"
+#define PLUGIN_VERSION "1.2.0"
 
 #define MAX_WEAPON_STRING 80
 #define	MAX_WEAPON_SLOTS 6
@@ -26,9 +26,10 @@ public Plugin myinfo =
 	url = ""
 };
 
-ConVar cvarZeusActive, cvarZeusInfiniteAmmo;
+ConVar cvarZeusActive, cvarZeusInfiniteAmmo, cvarTaserAmmo;
 bool isZeusActive = true;
 bool isInfiniteAmmoActive = false;
+int taserAmmo = 1;
 
 //bool hasHookedPlayers = false;
 
@@ -42,13 +43,16 @@ public void OnPluginStart()
 	CreateConVar("sm_unlimitedpower_version", PLUGIN_VERSION, 
 		"Version of 'Unlimited Power'", FCVAR_SPONLY | FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_DONTRECORD);
 	cvarZeusActive = CreateConVar("sm_unlimitedpower_active", "1", "Everyone starts with Zeus Taser", _, true, 0.0, true, 1.0);
-	cvarZeusInfiniteAmmo = CreateConVar("sm_unlimitedpower_infinite_ammo", "0", "Zeus never runs out of ammo", _, true, 0.0, true, 1.0);
+	cvarZeusInfiniteAmmo = CreateConVar("sm_unlimitedpower_infinite_ammo", "0", "Zeus never runs out of ammo(NYI)", _, true, 0.0, true, 1.0);
+	cvarTaserAmmo = CreateConVar("sm_unlimitedpower_taser_ammo", "1", "Max taser ammo", _, true, 1.0, true, 254.0);
 	
 	isZeusActive = cvarZeusActive.BoolValue;
 	isInfiniteAmmoActive = cvarZeusInfiniteAmmo.BoolValue;
+	taserAmmo = cvarTaserAmmo.IntValue;
 	
 	cvarZeusActive.AddChangeHook(OnChangedZeusActive);
 	cvarZeusInfiniteAmmo.AddChangeHook(OnChangedInfiniteAmmo);
+	cvarTaserAmmo.AddChangeHook(OnChangedTaserAmmo);
 	
 	AutoExecConfig(true, "plugin_unlimited_power");
 	
@@ -74,10 +78,8 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	int teamIndex = GetClientTeam(client);
 	if (IsPlayerAlive(client) && (teamIndex == CS_TEAM_CT || teamIndex == CS_TEAM_T)) {
 		int taser = GivePlayerItem(client, "weapon_taser");
-		if (taser != -1 && isInfiniteAmmoActive) {
-			SetEntProp(taser, Prop_Send, "m_iClip1", 1);
-			SetEntProp(taser, Prop_Send, "m_iAmmo", 1000);
-			SetEntProp(taser, Prop_Send, "m_iPrimaryReserveAmmoCount", 999);
+		if (taser != -1 && taserAmmo != 1) {
+			SetEntProp(taser, Prop_Send, "m_iClip1", taserAmmo);
 		}
 		
 	}
@@ -91,4 +93,8 @@ public void OnChangedZeusActive(ConVar convar, const char[] oldValue, const char
 
 public void OnChangedInfiniteAmmo(ConVar convar, const char[] oldValue, const char[] newValue) {
 	isInfiniteAmmoActive = cvarZeusInfiniteAmmo.BoolValue;
-} 
+}
+
+public void OnChangedTaserAmmo(ConVar convar, const char[] oldValue, const char[] newValue) {
+	taserAmmo = cvarTaserAmmo.IntValue;
+}
